@@ -670,14 +670,14 @@ const PASSWORDS = {
 };
 
 // ── ESTADO ──
-let ST={}, GS_URL='', CUR=null, FILT='TODOS', SK='caso', SA=true, ROL=null;
+let ST={}, GS_URL='https://script.google.com/macros/s/AKfycbycN-sNwyVqZmtKgXUJGiPzWkcEmIJ7u3UMCvrluNqXudeW3NSU-WwUpOzjpYVQhhea/exec', CUR=null, FILT='TODOS', SK='caso', SA=true, ROL=null;
 
 function lsG(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function lsS(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function cargarLocal(){
   const s=lsG('merpes_obs_2026_v5');
   if(s) ST=s;
-  GS_URL=localStorage.getItem('merpes_gs_url')||'';
+  GS_URL=localStorage.getItem('merpes_gs_url')||GS_URL||'';
 }
 function guardarLocal(){lsS('merpes_obs_2026_v5',ST);}
 
