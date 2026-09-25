@@ -202,6 +202,28 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
   th:nth-child(n+9){display:none}td:nth-child(n+9){display:none}
   .mkpi{grid-template-columns:repeat(3,1fr)}.frow{grid-template-columns:1fr}.conf-grid{grid-template-columns:1fr}
 }
+
+/* === MODAL CONFIG SYNC === */
+.cfg-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center}
+.cfg-ov.open{display:flex}
+.cfg-box{background:#fff;border-radius:12px;width:520px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden}
+.cfg-hdr{background:#1a3a5c;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.cfg-hdr h2{margin:0;font-size:15px}
+.cfg-body{padding:20px}
+.cfg-status{display:flex;align-items:center;gap:10px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px}
+.cfg-steps{font-size:11px;color:#4A5568;background:#EBF8FF;border:1px solid #BEE3F8;border-radius:8px;padding:12px;margin-bottom:16px;line-height:1.8}
+.cfg-steps code{background:#fff;border:1px solid #CBD5E0;border-radius:3px;padding:1px 4px;font-size:10px}
+.cfg-inp-wrap{display:flex;gap:8px;align-items:center}
+.cfg-inp{flex:1;border:1.5px solid #CBD5E0;border-radius:6px;padding:8px 10px;font-size:11px;font-family:monospace}
+.cfg-inp:focus{outline:none;border-color:#3182CE}
+.cfg-btn-test{background:#3182CE;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:11px;cursor:pointer;white-space:nowrap}
+.cfg-btn-test:hover{background:#2B6CB0}
+.cfg-btn-save{background:#276749;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.cfg-btn-save:hover{background:#22543D}
+.cfg-btn-clear{background:#C53030;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:11px;cursor:pointer}
+.cfg-test-result{margin-top:8px;font-size:11px;padding:7px 10px;border-radius:5px;display:none}
+.cfg-test-ok{background:#F0FFF4;color:#276749;border:1px solid #9AE6B4}
+.cfg-test-err{background:#FFF5F5;color:#C53030;border:1px solid #FEB2B2}
 </style>
 </head>
 <body>
@@ -239,6 +261,8 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
    <div class="user-chip uc-LOG" id="user_chip" onclick="cerrarSesion()" title="Clic para cerrar sesión">
     <span id="user_ico">📦</span><span id="user_name">Logística</span><span style="opacity:.6;font-size:10px"> · Salir</span>
    </div>
+   <button id="btn_config" onclick="abrirConfig()" title="Configurar sincronización" style="display:none;background:#1a3a5c;border:1px solid #2d6a9f;color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-left:6px">⚙ Sync</button>
+   <span id="sync_indicator" title="Sin sincronización configurada" style="margin-left:6px;font-size:16px;cursor:pointer" onclick="abrirConfig()">⚫</span>
    <span class="hbadge" id="reloj">--:--</span>
   </div>
  </div>
@@ -473,6 +497,48 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
  </div>
 </div>
 <div class="toast" id="toast_el"></div>
+
+<!-- MODAL CONFIG SYNC -->
+<div class="cfg-ov" id="cfg_ov">
+ <div class="cfg-box">
+  <div class="cfg-hdr">
+   <h2>⚙ Configuración de Sincronización — Apps Script</h2>
+   <button onclick="cerrarConfig()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>
+  </div>
+  <div class="cfg-body">
+   <div class="cfg-status" id="cfg_status_box">
+    <span id="cfg_status_ico" style="font-size:22px">⚫</span>
+    <div>
+     <div id="cfg_status_txt" style="font-weight:700;color:#2D3748">Sin conexión configurada</div>
+     <div id="cfg_status_sub" style="color:#718096;font-size:10px;margin-top:2px">Configura la URL para sincronizar entre Logística y Contabilidad</div>
+    </div>
+   </div>
+   <div class="cfg-steps">
+    <strong>📋 Pasos para configurar (solo una vez):</strong><br>
+    1. Ve a <code>script.google.com</code> → Nuevo proyecto<br>
+    2. Borra todo el código y pega el código del Apps Script (botón de abajo)<br>
+    3. Clic en <strong>Implementar</strong> → <strong>Nueva implementación</strong><br>
+    4. Tipo: <strong>Aplicación web</strong> · Ejecutar como: <strong>Yo</strong> · Acceso: <strong>Cualquier persona</strong><br>
+    5. Clic <strong>Implementar</strong> → Autoriza → Copia la URL que aparece<br>
+    6. Pega esa URL aquí abajo y clic <strong>Guardar y sincronizar</strong>
+   </div>
+   <div style="margin-bottom:12px">
+    <button onclick="copiarCodigoGS()" style="background:#718096;color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;cursor:pointer;width:100%">📋 Copiar código Apps Script al portapapeles</button>
+   </div>
+   <label style="font-size:11px;font-weight:700;color:#2D3748;display:block;margin-bottom:5px">URL del Web App (Apps Script):</label>
+   <div class="cfg-inp-wrap">
+    <input type="url" class="cfg-inp" id="cfg_url_inp" placeholder="https://script.google.com/macros/s/AKfycby.../exec">
+    <button class="cfg-btn-test" onclick="testearGS()">🔗 Probar</button>
+   </div>
+   <div class="cfg-test-result" id="cfg_test_result"></div>
+   <div style="display:flex;gap:8px;margin-top:14px">
+    <button class="cfg-btn-save" onclick="guardarConfigGS()">✅ Guardar y sincronizar ahora</button>
+    <button class="cfg-btn-clear" onclick="limpiarConfigGS()">🗑 Quitar conexión</button>
+   </div>
+  </div>
+ </div>
+</div>
+
 </div><!-- /app -->
 <script>
 const BASE   = [{"n":223,"cod":"10000503","desc":"FREIDORA DE AIRE DIGITAL MERTEC 4.2 LITROS MT-001BV","grp":"FREIDORAS","um":"UND","sis":1.0,"cont":0.0,"dif":-1.0,"cu":85.06,"al":85.06,"am":0.0,"an":-85.06,"tipo":"FALTANTE","caso":"CASO1","nro":"1.0","est":"REG. DOCUMENTARIA","resp":"MIGUEL CALLE","obs":"Se regularizó con consumo de  Jéssica Lescano, se dio salidac con GR: T005-00000437","coment":"VER CON JESSICA LESCANO","resp_mybees":""},{"n":510,"cod":"10000862","desc":"MAQUINA COSEDORA INALAMBRICA GK9-900A RYU","grp":"MÁQUINA DE COSER","um":"UND","sis":1.0,"cont":0.0,"dif":-1.0,"cu":627.12,"al":627.12,"am":0.0,"an":-627.12,"tipo":"FALTANTE","caso":"CASO2","nro":"2.0","est":"REG. DOCUMENTARIA","resp":"MIGUEL CALLE","obs":"Hubo duplicidad de NC, al momento de anular la entrega se golpeó dobelmente al kardex con 1 und afectando el stock. Se emitió GR: T006-00001150 del 23.09.26","coment":"REGULARIZARAN DOCUMENTARIA MIGUEL - DANTE CON SISTEMAS","resp_mybees":""},{"n":567,"cod":"10000936","desc":"MOLINILLO ELÉCTRICO DE CAFE LI-HELPER 200W","grp":"MOLEDOR","um":"UND","sis":2.0,"cont":0.0,"dif":-2.0,"cu":24.575,"al":49.15,"am":0.0,"an":-49.15,"tipo":"FALTANTE","caso":"CASO3","nro":"3.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"REGULARIZARAN DOCUMENTARIA MIGUEL - DANTE CON SISTEMAS","resp_mybees":""},{"n":651,"cod":"11000074","desc":"PAPEL BOND A4 PQTX500","grp":"MAQUINARIA, EQUIPOS COMPUTO Y TECNOLOGIA","um":"UND","sis":36.0,"cont":0.0,"dif":-36.0,"cu":14.3,"al":514.8,"am":0.0,"an":-514.8,"tipo":"FALTANTE","caso":"CASO4","nro":"4.0","est":"AJUSTE","resp":"DANTE CLAVIJO","obs":"Producto consumible","coment":"AJUSTE","resp_mybees":""},{"n":696,"cod":"11000195","desc":"CELULAR APPLE IPHONE 13 6.1\" 128GB ROSADO","grp":"CELULARES","um":"UND","sis":2.0,"cont":1.0,"dif":-1.0,"cu":1880.06,"al":3760.12,"am":1880.06,"an":-1880.06,"tipo":"FALTANTE","caso":"CASO33","nro":"33.0","est":"ERROR SIG","resp":"KIN CORONADO","obs":"Se emitió NC: B002-00005364 que afectó kardex cuando debió ser sólo precio, se corrigión con GR:T002-109384 del 23.09.26","coment":"AJUSTE NO SE ACTIVO ESTADO STOCK DIFERIDO EN EL AÑO 2024","resp_mybees":""},{"n":2435,"cod":"15000005","desc":"TUBO DE ABASTO 1/2\" x 100 CM","grp":"VARIOS","um":"UND","sis":26.0,"cont":0.0,"dif":-26.0,"cu":5.5,"al":143.0,"am":0.0,"an":-143.0,"tipo":"FALTANTE","caso":"CASO6","nro":"6.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"VERA CON ENDIRA","resp_mybees":""},{"n":2537,"cod":"15000129","desc":"PILA TIPO D","grp":"VARIOS","um":"UND","sis":1139.0,"cont":484.0,"dif":-655.0,"cu":1.7,"al":1936.3,"am":822.8,"an":-1113.5,"tipo":"FALTANTE","caso":"CASO69","nro":"69.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2507,"cod":"15000096","desc":"CILINDRO ASADOR MEAT MASTER MINI","grp":"PARRILLAS A GAS/CARBÓN","um":"UND","sis":1.0,"cont":0.0,"dif":-1.0,"cu":152.54,"al":152.54,"am":0.0,"an":-152.54,"tipo":"FALTANTE","caso":"CASO8","nro":"8.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"REGULARIZARAN DOCUMENTARIA MIGUEL - DANTE CON SISTEMAS","resp_mybees":""},{"n":2894,"cod":"19001124","desc":"MINI TALADRO PORTATIL CON ACCESORIOS","grp":"TALADRO","um":"UND","sis":1.0,"cont":0.0,"dif":-1.0,"cu":20.7829,"al":20.78,"am":0.0,"an":-20.78,"tipo":"FALTANTE","caso":"CASO9","nro":"9.0","est":"REG. DOCUMENTARIA","resp":"MIGUEL CALLE","obs":"Sustentar con Jéssica, venta gratuita en feria de Backus con GR: T006-00001151","coment":"AJUSTE","resp_mybees":""},{"n":2950,"cod":"22000011","desc":"REPUESTO PARA OLLA FREIDORA / CAJA EMPAQUE EXTERIOR","grp":"REPUESTOS","um":"UND","sis":12.0,"cont":0.0,"dif":-12.0,"cu":0.0342,"al":0.41,"am":0.0,"an":-0.41,"tipo":"FALTANTE","caso":"CASO10","nro":"10.0","est":"AJUSTE","resp":"DANTE CLAVIJO","obs":"Realizar ajuste","coment":"AJUSTE","resp_mybees":""},{"n":51,"cod":"10000129","desc":"TERMA JASA INSTANTANEA DE TIRO FORZADO 10LIT/GALON","grp":"CALENTADORES","um":"UND","sis":2.0,"cont":1.0,"dif":-1.0,"cu":271.31,"al":542.62,"am":271.31,"an":-271.31,"tipo":"FALTANTE","caso":"CASO14","nro":"14.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Cruce con el codigo 10000180","coment":"REGULARIZACION DOCUMENTARIA GUIAS OTROS","resp_mybees":""},{"n":242,"cod":"10000525","desc":"TERMA AGHASO 10L TIRO FORZADO GN-AGH011 + KIT INSTALACIÓN","grp":"CALENTADORES","um":"UND","sis":11.0,"cont":10.0,"dif":-1.0,"cu":257.3191,"al":2830.51,"am":2573.19,"an":-257.32,"tipo":"FALTANTE","caso":"CASO24","nro":"24.0","est":"UBICADO","resp":"POOL RAMIREZ","obs":"Se envió evidencia de ubicación de producto (mal conteo)","coment":"REGULARIZACION DOCUMENTARIA GUIAS OTROS","resp_mybees":""},{"n":3489,"cod":"35000024","desc":"JUEGO DE OLLAS DE METAL 12 PIEZAS INCLUYE 10 SET DE UTENSILIOS","grp":"UTENSILIO DE COCINA","um":"UND","sis":3.0,"cont":0.0,"dif":-3.0,"cu":68.18,"al":204.54,"am":0.0,"an":-204.54,"tipo":"FALTANTE","caso":"CASO11","nro":"11.0","est":"UBICADO","resp":"POOL RAMIREZ","obs":"Ubicado en ZONA 16 por Luis Carrasco posterior al inventario","coment":"REGULARIZAR","resp_mybees":""},{"n":3522,"cod":"35000061","desc":"OLLA A PRESIÓN FACUSA MOD3 AC 7LT + SET DE CUBIERTOS 16 PIEZAS FACUSA MOD 60. ESCAMA","grp":"OLLAS A PRESION","um":"UND","sis":11.0,"cont":10.0,"dif":-1.0,"cu":123.119,"al":1354.31,"am":1231.19,"an":-123.12,"tipo":"FALTANTE","caso":"CASO75","nro":"75.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"AVERIGUAR CON DANTE Y POOL","resp_mybees":""},{"n":2446,"cod":"15000018","desc":"SARTEN ANTIADH.# 24 NEGRO 2.5MM C/ESPATULA ICHIMATSU","grp":"UTENSILIO DE COCINA","um":"UND","sis":4.0,"cont":1.0,"dif":-3.0,"cu":22.9225,"al":91.69,"am":22.92,"an":-68.77,"tipo":"FALTANTE","caso":"CASO59","nro":"59.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2253,"cod":"12000051","desc":"SABANAS MICROFIBRA GRIS KING","grp":"ROPA DE CAMA","um":"UND","sis":1.0,"cont":0.0,"dif":-1.0,"cu":60.6,"al":60.6,"am":0.0,"an":-60.6,"tipo":"FALTANTE","caso":"CASO5","nro":"5.0","est":"RECLASIFICACIÓN","resp":"POOL RAMIREZ","obs":"Sustentar con RECLASIFICACIÓN","coment":"VERA CON JESSICA LESCANO","resp_mybees":""},{"n":2500,"cod":"15000089","desc":"MANDIL PUBLICITARIO CON BOLSILLO MATERIAL DRILL 80X50 CM CRISTAL","grp":"MANDIL","um":"UND","sis":86.0,"cont":82.0,"dif":-4.0,"cu":11.5,"al":989.0,"am":943.0,"an":-46.0,"tipo":"FALTANTE","caso":"CASO62","nro":"62.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2439,"cod":"15000009","desc":"PAR DE PILA TIPO D","grp":"VARIOS","um":"UND","sis":19.0,"cont":0.0,"dif":-19.0,"cu":1.5414,"al":29.29,"am":0.0,"an":-29.29,"tipo":"FALTANTE","caso":"CASO7","nro":"7.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2502,"cod":"15000091","desc":"VASO CRISTOBAL GDE.LLANO C/LOGO PILSEN CALLAO","grp":"VAJILLAS","um":"UND","sis":18.0,"cont":12.0,"dif":-6.0,"cu":2.1,"al":37.8,"am":25.2,"an":-12.6,"tipo":"FALTANTE","caso":"CASO64","nro":"64.0","est":"RECLASIFICACIÓN","resp":"DANTE CLAVIJO","obs":"Reclasificar por código 15000090","coment":"AJUSTE","resp_mybees":""},{"n":151,"cod":"10000360","desc":"MINI ALTAVOZ INTELIGENTE CON BLUETOOTH CL-671","grp":"PARLANTES","um":"UND","sis":20.0,"cont":19.0,"dif":-1.0,"cu":12.712,"al":254.24,"am":241.53,"an":-12.71,"tipo":"FALTANTE","caso":"CASO20","nro":"20.0","est":"REG. DOCUMENTARIA","resp":"MIGUEL CALLE","obs":"Sustentar con Jéssica, venta gratuita en feria de Backus con GR: T006-00001151","coment":"REGULARIZACION DOCUMENTARIA GUIAS OTROS","resp_mybees":""},{"n":2942,"cod":"22000003","desc":"REPUESTO SANDUCHERA/CARCASA","grp":"REPUESTOS","um":"UND","sis":18.0,"cont":21.0,"dif":3.0,"cu":0.0528,"al":0.95,"am":1.11,"an":0.16,"tipo":"SOBRANTE","caso":"CASO72","nro":"72.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":3474,"cod":"34000011","desc":"ACEITE ENMOTTO 20W50 (ROJO) MINERAL API SJ 1 LTR UND","grp":"ACCESORIOS","um":"UND","sis":344.0,"cont":345.0,"dif":1.0,"cu":6.7761,"al":2330.98,"am":2337.75,"an":6.78,"tipo":"SOBRANTE","caso":"CASO73","nro":"73.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2755,"cod":"19000519","desc":"CAJA DE HERRAMIENTAS MERTEC MT-008B","grp":"HERRAMIENTAS","um":"UND","sis":53.0,"cont":53.0,"dif":1.0,"cu":16.0216,"al":833.12,"am":849.14,"an":16.02,"tipo":"SOBRANTE","caso":"CASO68","nro":"68.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"SUSTENTAR DIFERENCIA DE SOBRANTE","resp_mybees":"OMAR BENAVIDES"},{"n":348,"cod":"10000663","desc":"TERMA A GAS SOLE 8LT MULTIPUNTO CONTROL TOTAL + KIT DE INSTALACION","grp":"CALENTADORES","um":"UND","sis":50.0,"cont":49.0,"dif":-1.0,"cu":446.7323,"al":22336.62,"am":21889.88,"an":-446.73,"tipo":"FALTANTE","caso":"CASO25","nro":"25.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Se emitió doble NC, se emitió GR Nro: T002-00109383 el 23.09.26 para regularizar","coment":"REGULARIZACION DOCUMENTARIA GUIAS OTROS","resp_mybees":""},{"n":2440,"cod":"15000010","desc":"TARUGO NARANJA 3/8\"","grp":"VARIOS","um":"UND","sis":372.0,"cont":715.0,"dif":343.0,"cu":0.05,"al":18.6,"am":35.75,"an":17.15,"tipo":"SOBRANTE","caso":"CASO56","nro":"56.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":225,"cod":"10000505","desc":"BARRA DE SONIDO MERTEC MT-006B","grp":"BARRA DE SONIDO","um":"UND","sis":1.0,"cont":1.0,"dif":1.0,"cu":18.34,"al":0.0,"am":18.34,"an":18.34,"tipo":"SOBRANTE","caso":"CASO18","nro":"18.0","est":"PENDIENTE","resp":"OMAR BENAVIDES","obs":"Sustentar con GR emitida","coment":"SUSTENTAR CON CONSUMO POR EVENTO","resp_mybees":""},{"n":432,"cod":"10000760","desc":"REFRIGERADORA INDURAMA RI-795DI SIDE BY SIDE NO FROST 529L","grp":"NEVERAS Y REFRIGERADORES","um":"UND","sis":3.0,"cont":4.0,"dif":1.0,"cu":1389.0033,"al":4167.01,"am":5556.01,"an":1389.0,"tipo":"SOBRANTE","caso":"CASO28","nro":"28.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Contaba con GR T002-00109279 del 18.09.26 se entregará el 23.09.26","coment":"FISICO 4 Y PENDIENTE 1 AVERIGUAR CON DANTE, SE PROGRAMO EL DESPACHO Y NO RECOGIERON","resp_mybees":""},{"n":2533,"cod":"15000125","desc":"SET DE CUBIERTOS 16 PIEZAS FACUSA MOD 60. ESCAMA","grp":"VAJILLAS","um":"UND","sis":66.0,"cont":69.0,"dif":3.0,"cu":10.8,"al":712.8,"am":745.2,"an":32.4,"tipo":"SOBRANTE","caso":"CASO67","nro":"67.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"REVISION DOCUMENTARIO","resp_mybees":"OMAR BENAVIDES"},{"n":573,"cod":"10000942","desc":"LAVADORA MABE 10KG LMAP0120WDGBB0 DIAMOND GREY","grp":"LAVADORAS Y SECADORAS","um":"UND","sis":7.0,"cont":6.0,"dif":-1.0,"cu":501.0163,"al":3507.11,"am":3006.1,"an":-501.02,"tipo":"FALTANTE","caso":"CASO30","nro":"30.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"REGULARIZACION AL UBICARSE PRODUCTO FALTANTE","resp_mybees":""},{"n":617,"cod":"10000993","desc":"CONSERVADORA EXHIBIDORA MIRAY CMVE-335D 332L","grp":"NEVERAS Y REFRIGERADORES","um":"UND","sis":3.0,"cont":5.0,"dif":2.0,"cu":1144.0683,"al":3432.2,"am":5720.34,"an":2288.14,"tipo":"SOBRANTE","caso":"CASO31","nro":"31.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Reintegro no debió ser contado, tenía GR:t011-00019652 y T011-00019650 del 18.09.26, despachadas 23.09.26 y programada 24.09.26","coment":"1 EN CAMION Y 1 EN REINTEGRO","resp_mybees":"OMAR BENAVIDES"},{"n":624,"cod":"10001009","desc":"TELEVISOR SAMSUNG MINI LED UN50M70HAGXPE 50\" UHD/4K SMART TV","grp":"TELEVISORES","um":"UND","sis":0.0,"cont":27.0,"dif":27.0,"cu":974.5763,"al":0.0,"am":26313.56,"an":26313.56,"tipo":"SOBRANTE","caso":"CASO32","nro":"32.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"GR T006-00001145 del 14.09.26 y no se entregó dos veces, despachado el 22.09.26","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":353,"cod":"10000680","desc":"HERVIDOR PRACTIKA NAPOLES BLACK 2.5L","grp":"TETERAS","um":"UND","sis":1.0,"cont":2.0,"dif":1.0,"cu":33.81,"al":33.81,"am":67.62,"an":33.81,"tipo":"SOBRANTE","caso":"CASO26","nro":"26.0","est":"PENDIENTE","resp":"OMAR BENAVIDES","obs":"Sustentar con GR emitida","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":743,"cod":"11000322","desc":"CELULAR HONOR X7b 6.8\" 8GB 256GB VERDE","grp":"CELULARES","um":"UND","sis":1.0,"cont":0.0,"dif":1.0,"cu":589.79,"al":-589.79,"am":0.0,"an":589.79,"tipo":"SOBRANTE","caso":"CASO34","nro":"34.0","est":"ERROR SIG","resp":"POOL RAMIREZ","obs":"Se emitió ticket y se subsanó en SIG","coment":"SUSTENTAR DIFERENCIA DE SOBRANTE","resp_mybees":""},{"n":881,"cod":"11000563","desc":"CELULAR SAMSUNG GALAXY A56 5G 6.6\" 8GB 256GB NEGRO S/CARGADOR","grp":"CELULARES","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":1203.39,"al":0.0,"am":1203.39,"an":1203.39,"tipo":"SOBRANTE","caso":"CASO35","nro":"35.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Contaba con GR ya emitida Nro: T015-0000377 del 19.09.26, se despachará el 24.09.26","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":2511,"cod":"15000101","desc":"SET TABLA + 4 CUCHILLOS","grp":"UTENSILIO DE COCINA","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":34.3673,"al":0.0,"am":34.37,"an":34.37,"tipo":"SOBRANTE","caso":"CASO65","nro":"65.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"REVISION DOCUMENTARIO","resp_mybees":"OMAR BENAVIDES"},{"n":1071,"cod":"11000831","desc":"LAPTOP LENOVO 15.6\" 82XQ00LTLM AMD R5-7520U WIN11 8GB 512GB SSD","grp":"PORTATILES","um":"UND","sis":1.0,"cont":2.0,"dif":1.0,"cu":1566.95,"al":1566.95,"am":3133.9,"an":1566.95,"tipo":"SOBRANTE","caso":"CASO37","nro":"37.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Se ingresó con GR: T349-000012 de Conecta Retail del 18.09.26, no se contaba con OC por eso no se ingresó. OC 001-8327","coment":"POOL GUIA","resp_mybees":""},{"n":1086,"cod":"11000861","desc":"CELULAR APPLE IPHONE 13 PRO 6.1\" 256GB DORADO nanoSIM REACONDICIONADO","grp":"CELULARES","um":"UND","sis":2.0,"cont":3.0,"dif":1.0,"cu":1508.475,"al":3016.95,"am":4525.42,"an":1508.47,"tipo":"SOBRANTE","caso":"CASO38","nro":"38.0","est":"EN CUSTODIA POR GARANTÍA","resp":"POOL RAMIREZ","obs":"No debió ser contado porque estaba en custodia por garantía. Adjunto email","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":1110,"cod":"11000894","desc":"CELULAR APPLE IPHONE 17 PRO MAX 6.9\" 12GB 256GB AZUL PROFUNDO eSIM","grp":"CELULARES","um":"UND","sis":1.0,"cont":2.0,"dif":1.0,"cu":4144.0675,"al":4144.07,"am":8288.14,"an":4144.07,"tipo":"SOBRANTE","caso":"CASO39","nro":"39.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Contaba con GR ya emitida Nro: T002-109190 del 15.09.26, anulado con NC:B002-00014811 del 23.09.26 por rechazo de cliente","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":221,"cod":"10000501","desc":"SANDWICHERA GRILL MERTEC MT-020S","grp":"SANDUCHERAS","um":"UND","sis":298.0,"cont":299.0,"dif":2.0,"cu":23.8208,"al":7074.78,"am":7122.42,"an":47.64,"tipo":"SOBRANTE","caso":"CASO23","nro":"23.0","est":"REG. DOCUMENTARIA","resp":"OMAR BENAVIDES","obs":"Despachado con GRs T011 - 19742 / 19748, se entregó a transportista el 22.09.26","coment":"GUIA 19628 19-09-2026","resp_mybees":"OMAR BENAVIDES"},{"n":1222,"cod":"11001008","desc":"CELULAR XIAOMI REDMI NOTE 15 PRO PLUS 5G 6.83\" 12GB 512GB NEGRO","grp":"CELULARES","um":"UND","sis":9.0,"cont":10.0,"dif":1.0,"cu":1381.3557,"al":12432.2,"am":13813.56,"an":1381.36,"tipo":"SOBRANTE","caso":"CASO41","nro":"41.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Contaba con GR ya emitida Nro: T002-109151 del 14.09.26, devuelto el viernes 18 a las 4 pm y anulado con NC:B002-00014813","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":2248,"cod":"12000045","desc":"SABANAS MICROFIBRA AZUL QUEEN","grp":"ROPA DE CAMA","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":58.9363,"al":0.0,"am":58.94,"an":58.94,"tipo":"SOBRANTE","caso":"CASOS","nro":"77.0","est":"RECLASIFICACIÓN","resp":"POOL RAMIREZ","obs":"Sustentar con RECLASIFICACIÓN","coment":"","resp_mybees":""},{"n":2224,"cod":"12000019","desc":"CUBRELECHO GRIS 1,5P","grp":"ROPA DE CAMA","um":"UND","sis":12.0,"cont":16.0,"dif":4.0,"cu":86.3367,"al":1036.04,"am":1381.39,"an":345.35,"tipo":"SOBRANTE","caso":"CASO42","nro":"42.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Reclasificado por SKU 12000020","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2225,"cod":"12000020","desc":"CUBRELECHO GRIS 2P","grp":"ROPA DE CAMA","um":"UND","sis":46.0,"cont":41.0,"dif":-5.0,"cu":94.1313,"al":4330.04,"am":3859.38,"an":-470.66,"tipo":"FALTANTE","caso":"CASO43","nro":"43.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce de 4 unidades con el codigo 12000019 (04 UNIDADES) y 1 unid SKU 12000025","coment":"AJUSTE","resp_mybees":""},{"n":2230,"cod":"12000025","desc":"CUBRELECHO AZUL 2 PLAZAS","grp":"ROPA DE CAMA","um":"UND","sis":21.0,"cont":22.0,"dif":1.0,"cu":94.1305,"al":1976.74,"am":2070.87,"an":94.13,"tipo":"SOBRANTE","caso":"CASO44","nro":"44.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce de 01 unidad con el codigo  12000030 (02 UNIDAD)","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2234,"cod":"12000029","desc":"DUVET HOTELERO 2P","grp":"ROPA DE CAMA","um":"UND","sis":11.0,"cont":13.0,"dif":2.0,"cu":113.5608,"al":1249.17,"am":1476.29,"an":227.12,"tipo":"SOBRANTE","caso":"CASO45","nro":"45.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000030 (02 UNIDADES)","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2235,"cod":"12000030","desc":"DUVET HOTELERO KING","grp":"ROPA DE CAMA","um":"UND","sis":4.0,"cont":1.0,"dif":-3.0,"cu":119.7725,"al":479.09,"am":119.77,"an":-359.32,"tipo":"FALTANTE","caso":"CASO46","nro":"46.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000029 (02 UNIDADES )  - FALTA 1 PENDIENTE","coment":"AJUSTE","resp_mybees":""},{"n":2238,"cod":"12000034","desc":"PROTECTOR DE COLCHÓN IMPERMEABLE 2P","grp":"ROPA DE CAMA","um":"UND","sis":117.0,"cont":115.0,"dif":-2.0,"cu":61.0773,"al":7146.04,"am":7023.89,"an":-122.15,"tipo":"FALTANTE","caso":"CASO47","nro":"47.0","est":"AJUSTE","resp":"DANTE CLAVIJO","obs":"No se ubica documento que sustente faltante","coment":"AJUSTE","resp_mybees":""},{"n":2240,"cod":"12000036","desc":"PROTECTOR DE COLCHÓN IMPERMEABLE QUEEN","grp":"ROPA DE CAMA","um":"UND","sis":9.0,"cont":8.0,"dif":-1.0,"cu":66.4767,"al":598.29,"am":531.81,"an":-66.48,"tipo":"FALTANTE","caso":"CASO48","nro":"48.0","est":"AJUSTE","resp":"DANTE CLAVIJO","obs":"No se ubica documento que sustente faltante","coment":"AJUSTE","resp_mybees":""},{"n":2250,"cod":"12000047","desc":"SABANAS MICROFIBRA GRIS 1 PLAZA","grp":"ROPA DE CAMA","um":"UND","sis":2.0,"cont":1.0,"dif":-1.0,"cu":50.215,"al":100.43,"am":50.22,"an":-50.22,"tipo":"FALTANTE","caso":"CASO49","nro":"49.0","est":"PENDIENTE","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000052 (1 UNIDAD )","coment":"AJUSTE","resp_mybees":""},{"n":2251,"cod":"12000048","desc":"SABANAS MICROFIBRA GRIS 1.5 PLAZA","grp":"ROPA DE CAMA","um":"UND","sis":11.0,"cont":9.0,"dif":-2.0,"cu":54.1591,"al":595.75,"am":487.43,"an":-108.32,"tipo":"FALTANTE","caso":"CASO50","nro":"50.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000054 (01 UNIDAD)","coment":"AJUSTE","resp_mybees":""},{"n":2254,"cod":"12000052","desc":"SABANAS MICROFIBRA GRIS OSCURO 1 PLAZA","grp":"ROPA DE CAMA","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":50.2157,"al":0.0,"am":50.22,"an":50.22,"tipo":"SOBRANTE","caso":"CASO51","nro":"51.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000047 (01 UNIDAD )","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2256,"cod":"12000054","desc":"SABANAS MICROFIBRA GRIS OSCURO 1.5 PLAZAS","grp":"ROPA DE CAMA","um":"UND","sis":8.0,"cont":9.0,"dif":1.0,"cu":54.1588,"al":433.27,"am":487.43,"an":54.16,"tipo":"SOBRANTE","caso":"CASO52","nro":"52.0","est":"RECLASIFICACIÓN","resp":"MIGUEL CALLE","obs":"Cruce con el codigo 12000048 (01 UNIDAD)","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2520,"cod":"15000110","desc":"CHALECO DEPORTIVO DRY FIT AZUL/AMARILLO LOGO CRISTAL","grp":"VARIOS","um":"UND","sis":85.0,"cont":89.0,"dif":4.0,"cu":13.1506,"al":1117.8,"am":1170.4,"an":52.6,"tipo":"SOBRANTE","caso":"CASO66","nro":"66.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GRs emitidas","coment":"REVISION DOCUMENTARIO","resp_mybees":"OMAR BENAVIDES"},{"n":124,"cod":"10000290","desc":"HORNO ELECTRICO MIRAY HEM-66","grp":"HORNOS","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":66.6093,"al":0.0,"am":66.61,"an":66.61,"tipo":"SOBRANTE","caso":"CASO19","nro":"19.0","est":"REG. DOCUMENTARIA","resp":"OMAR BENAVIDES","obs":"Despachado con GR T011 - 19506, se entregó a transportista el 22.09.26","coment":"CONSULTAR CON POOL Y DANTE","resp_mybees":""},{"n":2501,"cod":"15000090","desc":"VASO CRISTOBAL GDE.LLANO C/LOGO CERVEZA CRISTAL","grp":"VAJILLAS","um":"UND","sis":12.0,"cont":42.0,"dif":30.0,"cu":2.7626,"al":33.15,"am":116.03,"an":82.88,"tipo":"SOBRANTE","caso":"CASO63","nro":"63.0","est":"RECLASIFICACIÓN","resp":"DANTE CLAVIJO","obs":"Reclasificar por código 15000091","coment":"AJUSTE","resp_mybees":"OMAR BENAVIDES"},{"n":2436,"cod":"15000006","desc":"NIPLE 1/2 X 1 1/2 GALVANIZADO","grp":"VARIOS","um":"UND","sis":569.0,"cont":805.0,"dif":236.0,"cu":0.3987,"al":226.86,"am":320.95,"an":94.09,"tipo":"SOBRANTE","caso":"CASO53","nro":"53.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2438,"cod":"15000008","desc":"CINTA TEFLON BLANCO","grp":"VARIOS","um":"UND","sis":276.0,"cont":596.0,"dif":320.0,"cu":0.35,"al":96.6,"am":208.6,"an":112.0,"tipo":"SOBRANTE","caso":"CASO55","nro":"55.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":55,"cod":"10000136","desc":"TERMA JASA INSTANTANEA 5.5 LT + KIT INSTALACION","grp":"CALENTADORES","um":"UND","sis":182.0,"cont":178.0,"dif":1.0,"cu":117.2942,"al":20761.07,"am":20878.37,"an":117.29,"tipo":"SOBRANTE","caso":"CASO15","nro":"15.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Pool realizará el cuadre de los totales","coment":"SUSTENTAR DIFERENCIAS","resp_mybees":""},{"n":2441,"cod":"15000011","desc":"TIRAFON DE 1/4\" X 2","grp":"VARIOS","um":"UND","sis":368.0,"cont":1207.0,"dif":839.0,"cu":0.15,"al":55.2,"am":181.05,"an":125.85,"tipo":"SOBRANTE","caso":"CASO57","nro":"57.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":31,"cod":"10000063","desc":"CAFETERA OSTER 12 TAZAS PROG NEGRA BVSTDCP12B","grp":"CAFETERAS","um":"UND","sis":5.0,"cont":6.0,"dif":1.0,"cu":144.068,"al":720.34,"am":864.41,"an":144.07,"tipo":"SOBRANTE","caso":"CASO12","nro":"12.0","est":"PENDIENTE","resp":"OMAR BENAVIDES","obs":"Sustentar con GR emitida","coment":"AVERIGUAR CON POOL Y DANTE","resp_mybees":""},{"n":2456,"cod":"15000039","desc":"PARRILLA A GAS KARSON 60x136x60cm 2 QUEMADORES","grp":"PARRILLAS A GAS/CARBÓN","um":"UND","sis":2.0,"cont":0.0,"dif":-1.0,"cu":381.34,"al":381.34,"am":0.0,"an":-381.34,"tipo":"FALTANTE","caso":"CASO61","nro":"61.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"SUSTENTAR DIFERENCIA DE FALTANTE","resp_mybees":""},{"n":484,"cod":"10000815","desc":"ARROCERA OSTER 2.2L VAPOR ANTIAD SILVER CKSTRC12DFSKE","grp":"OLLA ARROCERA","um":"UND","sis":8.0,"cont":9.0,"dif":1.0,"cu":192.7292,"al":1541.83,"am":1734.56,"an":192.73,"tipo":"SOBRANTE","caso":"CASO29","nro":"29.0","est":"PENDIENTE","resp":"OMAR BENAVIDES","obs":"Sustentar con GR emitida","coment":"1 SOBRA PENDIENTE CONFIRMAR GUIA CON DANTE Y POOL","resp_mybees":""},{"n":2447,"cod":"15000020","desc":"OLLA PRESION 6 LT PRESS","grp":"UTENSILIO DE COCINA","um":"UND","sis":2.0,"cont":3.0,"dif":1.0,"cu":228.085,"al":456.17,"am":684.25,"an":228.09,"tipo":"SOBRANTE","caso":"CASO60","nro":"60.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Revisar kardex","coment":"CONFIRMAR CON POOL Y DANTE","resp_mybees":""},{"n":3512,"cod":"35000049","desc":"BALANZA COMERCIAL DIGITAL VENTUS B-40 + SET DE CUBIERTOS 16 PIEZAS FACUSA MOD 60. ESCAMA","grp":"BALANZA COMERCIAL","um":"UND","sis":7.0,"cont":10.0,"dif":3.0,"cu":86.22,"al":603.54,"am":862.2,"an":258.66,"tipo":"SOBRANTE","caso":"CASO74","nro":"74.0","est":"REG. DOCUMENTARIA","resp":"OMAR BENAVIDES","obs":"Despachado con GRs: T011 - 18868 / 19624  /  19583 , se entregó a transportista el 22.09.26","coment":"GUIA 19583 17-09-2026 / GUIA 18195 11-08-2026 / GUIA 31/08/26 GUIA18868","resp_mybees":"OMAR BENAVIDES"},{"n":173,"cod":"10000413","desc":"TERMA AQUAMAXX DE PASO A GN TIPO A 5.5 LTS/MIN + KIT DE INSTALACIÓN","grp":"CALENTADORES","um":"UND","sis":7.0,"cont":9.0,"dif":2.0,"cu":179.7905,"al":1258.53,"am":1618.11,"an":359.58,"tipo":"SOBRANTE","caso":"CASO21","nro":"21.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GR emitida","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":1011,"cod":"11000700","desc":"CELULAR SAMSUNG GALAXY A07 6.7\" 4GB 128GB NEGRO S/CARGADOR","grp":"CELULARES","um":"UND","sis":4.0,"cont":5.0,"dif":1.0,"cu":363.3606,"al":1453.44,"am":1816.8,"an":363.36,"tipo":"SOBRANTE","caso":"CASO36","nro":"36.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GR emitida","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":369,"cod":"10000696","desc":"BALANZA COMERCIAL DIGITAL VENTUS B-40","grp":"BALANZA COMERCIAL","um":"UND","sis":14.0,"cont":19.0,"dif":5.0,"cu":75.4201,"al":1055.88,"am":1432.98,"an":377.1,"tipo":"SOBRANTE","caso":"CASO27","nro":"27.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GR emitida","coment":"AVERIGUAR CON GUIAS LA SALIDA n°17283 15-07-2026 1 / 18-07-2026 NG17367 /","resp_mybees":"OMAR BENAVIDES"},{"n":2554,"cod":"15000145","desc":"SET DE OLLAS FACUSA X12 CLASICA T/V (16/18/20/24/26/TETERA 3L)","grp":"UTENSILIO DE COCINA","um":"UND","sis":80.0,"cont":83.0,"dif":3.0,"cu":171.6375,"al":13731.0,"am":14245.91,"an":514.91,"tipo":"SOBRANTE","caso":"CASO70","nro":"70.0","est":"REG. DOCUMENTARIA","resp":"OMAR BENAVIDES","obs":"Despachado con GRs: T011 - 19639 / 19604 /  19620 , se entregó a transportista el 22.09.26","coment":"3 GUIAS 19625 18-09-26 /GUIA 19604 17-09-26 / GUIA 19620 18-09-2026","resp_mybees":"OMAR BENAVIDES"},{"n":74,"cod":"10000171","desc":"REFRIGERADORA INDURAMA RI-289D CROMA 176L","grp":"NEVERAS Y REFRIGERADORES","um":"UND","sis":2.0,"cont":3.0,"dif":1.0,"cu":530.49,"al":1060.98,"am":1591.47,"an":530.49,"tipo":"SOBRANTE","caso":"CASO16","nro":"16.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Sustentar con GR emitida","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":1159,"cod":"11000945","desc":"CELULAR SAMSUNG GALAXY A17 6.7\" 8GB 256GB NEGRO S/CARGADOR","grp":"CELULARES","um":"UND","sis":2.0,"cont":3.0,"dif":1.0,"cu":719.49,"al":1438.98,"am":2158.47,"an":719.49,"tipo":"SOBRANTE","caso":"CASO40","nro":"40.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Pendiente de entrega, ya tiene GR: T002-00109272 emitida el 18.09.26, entregada el 22.09.26","coment":"SUTENTO DOCUMENTO GUIA SALIDA","resp_mybees":""},{"n":2563,"cod":"15000154","desc":"SARTEN WOK RECORD N26-2MM 26CM - C/TAPA DE VIDRIO","grp":"UTENSILIO DE COCINA","um":"UND","sis":13.0,"cont":11.0,"dif":-2.0,"cu":55.99,"al":727.87,"am":615.89,"an":-111.98,"tipo":"FALTANTE","caso":"CASO71","nro":"71.0","est":"UBICADO","resp":"MIGUEL CALLE","obs":"Producto fue ubicado en Almacen . Se envio correo con sustento y fotos","coment":"AJUSTE","resp_mybees":""},{"n":80,"cod":"10000180","desc":"TERMA JASA INSTANTANEA DE TIRO FORZADO 10LIT/GALON + KIT DE INSTALACIÓN","grp":"CALENTADORES","um":"UND","sis":112.0,"cont":115.0,"dif":3.0,"cu":288.0369,"al":32260.13,"am":33124.24,"an":864.11,"tipo":"SOBRANTE","caso":"CASO17","nro":"17.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Pool realizará el cuadre de los totales","coment":"REVISION DOCUMENTARIO","resp_mybees":""},{"n":2437,"cod":"15000007","desc":"VALVULA 1/2 DN15 DN40","grp":"VARIOS","um":"UND","sis":122.0,"cont":277.0,"dif":155.0,"cu":7.314,"al":892.31,"am":2025.98,"an":1133.67,"tipo":"SOBRANTE","caso":"CASO54","nro":"54.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":2443,"cod":"15000014","desc":"TUBO DE ABASTO 1/2\" X 40 CM","grp":"VARIOS","um":"UND","sis":184.0,"cont":539.0,"dif":355.0,"cu":3.399,"al":625.42,"am":1832.06,"an":1206.64,"tipo":"SOBRANTE","caso":"CASO58","nro":"58.0","est":"PENDIENTE","resp":"DANTE CLAVIJO","obs":"Realizar último reconteo","coment":"AJUSTE","resp_mybees":""},{"n":49,"cod":"10000126","desc":"TERMA JASA INSTANTANEA DE TIRO NATURAL 5.5 LIT/MIN GN","grp":"CALENTADORES","um":"UND","sis":246.0,"cont":264.0,"dif":18.0,"cu":100.9758,"al":24840.05,"am":26657.61,"an":1817.56,"tipo":"SOBRANTE","caso":"CASO13","nro":"13.0","est":"PENDIENTE","resp":"POOL RAMIREZ","obs":"Pool realizará el cuadre de los totales","coment":"REVISAR CON DOCUMENTO Y RECLASIFICAR CODIGOS","resp_mybees":""},{"n":3247,"cod":"33000381","desc":"MOTO SSENDA ECO FINITI 150 ROJO","grp":"MOTOS","um":"UND","sis":0.0,"cont":1.0,"dif":1.0,"cu":2139.83,"al":0.0,"am":2139.83,"an":2139.83,"tipo":"SOBRANTE","caso":"CASO76","nro":"76.0","est":"REG. DOCUMENTARIA","resp":"POOL RAMIREZ","obs":"Motocicleta ingresó el sábado en la tarde no se ingresó al sistema porque el SKU de la OC estaba errado, fue corregido en OC e ingresado el 24.09.26","coment":"","resp_mybees":""}];
@@ -664,7 +730,12 @@ function iniciarApp(r){
   chip.className='user-chip '+uc[r];
   cargarLocal();
   rKPI(); render();
-  if(GS_URL) syncNow();
+  // Mostrar botón config solo para Logística
+  const btnCfg=document.getElementById('btn_config');
+  if(btnCfg) btnCfg.style.display=(r==='LOGISTICA')?'inline-block':'none';
+  // Sync inicial
+  if(GS_URL){ syncInicial(); }
+  else { setSyncStatus('off','Sin sincronización configurada'); }
 }
 function cerrarSesion(){
   ROL=null; rolSel=null;
@@ -685,14 +756,144 @@ async function gsPost(cod,data){
   if(!GS_URL) return false;
   try{const r=await fetch(GS_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save',cod,data})});return r.ok;}catch(e){return false;}
 }
-async function syncNow(){
-  const rem=await gsGet();
-  if(rem){
-    Object.entries(rem).forEach(([c,d])=>{const l=ST[c];if(!l||(d.ts&&(!l.ts||d.ts>l.ts)))ST[c]=d;});
-    guardarLocal(); rKPI(); render();
+// ── INDICADOR DE SYNC ──
+function setSyncStatus(status, msg){
+  const ico=document.getElementById('sync_indicator');
+  const maps={ok:'🟢',err:'🔴',busy:'🟡',off:'⚫'};
+  if(ico){ico.textContent=maps[status]||'⚫'; ico.title=msg||'';}
+  // también actualiza el modal si está abierto
+  const si=document.getElementById('cfg_status_ico');
+  const st=document.getElementById('cfg_status_txt');
+  const ss=document.getElementById('cfg_status_sub');
+  if(!si) return;
+  if(status==='ok'){
+    si.textContent='🟢'; st.textContent='Conectado a Google Sheets';
+    ss.textContent=msg||'Sincronización activa';
+  } else if(status==='err'){
+    si.textContent='🔴'; st.textContent='Error de conexión';
+    ss.textContent=msg||'Verifica la URL del Apps Script';
+  } else if(status==='busy'){
+    si.textContent='🟡'; st.textContent='Sincronizando...';
+    ss.textContent=msg||'';
+  } else {
+    si.textContent='⚫'; st.textContent='Sin conexión configurada';
+    ss.textContent='Configura la URL para sincronizar entre Logística y Contabilidad';
   }
 }
-setInterval(syncNow,45000);
+
+async function syncNow(){
+  if(!GS_URL){setSyncStatus('off'); return;}
+  setSyncStatus('busy','Cargando datos del servidor...');
+  const rem=await gsGet();
+  if(rem){
+    let updated=false;
+    Object.entries(rem).forEach(([c,d])=>{
+      const l=ST[c];
+      if(!l||(d.ts&&(!l.ts||d.ts>l.ts))){ST[c]=d; updated=true;}
+    });
+    if(updated){guardarLocal(); rKPI(); render();}
+    setSyncStatus('ok','Última sync: '+new Date().toLocaleTimeString('es-PE'));
+  } else {
+    setSyncStatus('err','No se pudo conectar al servidor');
+  }
+}
+
+// Sync inicial: sube estado local al servidor también
+async function syncInicial(){
+  if(!GS_URL) return;
+  setSyncStatus('busy','Sincronizando datos iniciales...');
+  // Primero baja del servidor
+  const rem=await gsGet();
+  if(rem){
+    // Merge: servidor gana si es más reciente
+    Object.entries(rem).forEach(([c,d])=>{
+      const l=ST[c];
+      if(!l||(d.ts&&(!l.ts||d.ts>l.ts))) ST[c]=d;
+    });
+  }
+  // Luego sube todo lo local al servidor
+  try{
+    await fetch(GS_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'saveAll', records:ST})
+    });
+    guardarLocal(); rKPI(); render();
+    setSyncStatus('ok','Sync inicial completa · '+new Date().toLocaleTimeString('es-PE'));
+  } catch(e){
+    setSyncStatus('err','Error en sync inicial: '+e.message);
+  }
+}
+
+setInterval(syncNow, 30000);
+
+// ── FUNCIONES MODAL CONFIG ──
+function abrirConfig(){
+  document.getElementById('cfg_ov').classList.add('open');
+  document.getElementById('cfg_url_inp').value=GS_URL||'';
+  document.getElementById('cfg_test_result').style.display='none';
+  if(GS_URL) setSyncStatus(GS_URL?'ok':'off');
+}
+function cerrarConfig(){
+  document.getElementById('cfg_ov').classList.remove('open');
+}
+
+async function testearGS(){
+  const url=document.getElementById('cfg_url_inp').value.trim();
+  const res=document.getElementById('cfg_test_result');
+  res.style.display='none';
+  if(!url){res.className='cfg-test-result cfg-test-err';res.textContent='⚠ Ingresa una URL primero';res.style.display='block';return;}
+  res.className='cfg-test-result';res.textContent='🟡 Probando conexión...';res.style.display='block';
+  try{
+    const r=await fetch(url+'?action=getAll');
+    if(r.ok){
+      const d=await r.json();
+      const n=Object.keys(d).length;
+      res.className='cfg-test-result cfg-test-ok';
+      res.textContent='✅ Conexión exitosa · '+n+' registro(s) en el servidor';
+    } else {
+      res.className='cfg-test-result cfg-test-err';
+      res.textContent='❌ Error HTTP '+r.status+'. Verifica que el Web App esté publicado correctamente.';
+    }
+  } catch(e){
+    res.className='cfg-test-result cfg-test-err';
+    res.textContent='❌ No se pudo conectar: '+e.message+'. ¿La URL es correcta?';
+  }
+}
+
+async function guardarConfigGS(){
+  const url=document.getElementById('cfg_url_inp').value.trim();
+  if(!url){toast('Ingresa una URL válida');return;}
+  GS_URL=url;
+  localStorage.setItem('merpes_gs_url',url);
+  toast('✅ URL guardada. Sincronizando...');
+  cerrarConfig();
+  await syncInicial();
+}
+
+function limpiarConfigGS(){
+  GS_URL='';
+  localStorage.removeItem('merpes_gs_url');
+  setSyncStatus('off','Sin conexión');
+  document.getElementById('cfg_url_inp').value='';
+  toast('Conexión eliminada');
+}
+
+function copiarCodigoGS(){
+  const code=document.getElementById('GS_CODE_EL')?.textContent||GS_CODE_FULL;
+  navigator.clipboard.writeText(GS_CODE_FULL).then(()=>{
+    toast('📋 Código copiado al portapapeles');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=GS_CODE_FULL;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('📋 Código copiado');
+  });
+}
 
 // ── LÓGICA SUBSANACIÓN ──
 function getDifFinal(c){
