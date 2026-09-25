@@ -729,7 +729,7 @@ function getEstadoSubsanacion(c){
 function gE(cod){return ST[cod]?.est||'PENDIENTE';}
 function gR(c){return ST[c.cod]?.resp||(c.resp_mybees||c.resp)||'';}
 function isConfirmado(cod){return ST[cod]?.estado_con==='CONFIRMADO';}
-function isPropuesto(cod){const st=ST[cod]||{};return st.cant_subs!==undefined&&st.cant_subs!==''&&st.estado_con!=='CONFIRMADO'&&st.estado_con!=='RECHAZADO';}
+function isPropuesto(cod){const st=ST[cod]||{};return st.cant_subs!==undefined&&st.cant_subs!==null&&st.cant_subs!==''&&st.estado_con!=='CONFIRMADO'&&st.estado_con!=='RECHAZADO';}
 
 const estClsMap={
   'PENDIENTE':'ePEN','UBICADO':'eUBI','REG. DOCUMENTARIA':'eREG',
@@ -962,7 +962,7 @@ function abrirDet(cod){
   // Info propuesta logística
   const confAlrt=document.getElementById('conf_pend_alert');
   const confPropInfo=document.getElementById('conf_prop_info');
-  if(isProp&&st.cant_subs){
+  if(isProp&&st.cant_subs!==undefined&&st.cant_subs!==''){
     confAlrt.style.display='none'; confPropInfo.style.display='block';
     const cu2=Math.abs(c.cu);
     confPropInfo.innerHTML='<strong>Propuesta de Logística:</strong> '+parseFloat(st.cant_subs).toFixed(0)+' ud subsanadas'
@@ -1009,9 +1009,9 @@ function abrirDet(cod){
     }
   }else{sectK.style.display='none';}
 
-  // Devoluciones faltantes
+  // Devoluciones faltantes — solo visible para Logística
   const sectD=document.getElementById('sect_devol');
-  if(c.dif<0){
+  if(c.dif<0&&isLog){
     sectD.style.display='block';
     const devs=DEVOL[cod]||[];
     if(!devs.length){document.getElementById('devol_tbl').innerHTML='<div class="no-data">✓ Sin devoluciones con stock diferido.</div>';}
