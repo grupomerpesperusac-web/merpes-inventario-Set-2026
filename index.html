@@ -276,13 +276,14 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
 </header>
 
 <div class="kpi-bar">
+ <div class="kpi" style="background:#EBF8FF;border-color:#63B3ED"><div class="val" style="font-size:14px;color:#2B6CB0">839</div><div class="lbl" style="color:#2B6CB0;font-weight:700">📦 SKUs con stock</div><div class="kpi-pct" style="color:#2B6CB0">universo del inventario</div></div>
  <div class="kpi navy"><div class="val">76</div><div class="lbl">Total casos</div><div class="kpi-pct" id="k_pct_casos">9.1% de SKUs</div></div>
  <div class="kpi red"><div class="val">30</div><div class="lbl">🔴 Faltantes</div><div class="kpi-pct">3.6% de SKUs</div></div>
  <div class="kpi blue"><div class="val">46</div><div class="lbl">🔵 Sobrantes</div><div class="kpi-pct">5.5% de SKUs</div></div>
  <div class="kpi yellow"><div class="val" id="k_pend">-</div><div class="lbl">⏳ Pendientes</div><div class="kpi-pct" id="k_pct_pend">—</div></div>
  <div class="kpi teal"><div class="val" id="k_conf">-</div><div class="lbl">🔄 Por confirmar</div><div class="kpi-pct" id="k_pct_conf">—</div></div>
  <div class="kpi green"><div class="val" id="k_res">-</div><div class="lbl">✅ Subsanados</div><div class="kpi-pct" id="k_pct_res">—</div></div>
- <div class="kpi gray"><div class="val" style="font-size:11px">S/4,632,806</div><div class="lbl">Inventario total</div><div class="kpi-pct">839 SKUs c/stock</div></div>
+ <div class="kpi gray"><div class="val" style="font-size:11px">S/2,316,108</div><div class="lbl">Inventario total</div><div class="kpi-pct">839 SKUs c/stock</div></div>
  <div class="kpi red"><div class="val" style="font-size:11px" id="k_an_falt">S/8,291</div><div class="lbl">Dif. Faltantes</div><div class="kpi-pct" id="k_pct_falt">—% del inv.</div></div>
  <div class="kpi blue"><div class="val" style="font-size:11px" id="k_an_sobr">S/52,923</div><div class="lbl">Dif. Sobrantes</div><div class="kpi-pct" id="k_pct_sobr">—% del inv.</div></div>
  <div class="kpi purple"><div class="val" style="font-size:11px" id="k_subsanado">S/0</div><div class="lbl">✅ Subsanado</div><div class="kpi-pct" id="k_pct_sub">—% del inv.</div></div>
@@ -992,7 +993,7 @@ function rKPI(){
   document.getElementById('k_an_falt').textContent='S/'+S(Math.abs(falt_final));
   document.getElementById('k_an_sobr').textContent='S/'+S(sobr_final);
   // ── Porcentajes sobre inventario total ──
-  const INV_TOT=4632806.21, SKU_TOT=839;
+  const INV_TOT=2316108.21, SKU_TOT=839;
   const pf=v=>v>0?(v/INV_TOT*100).toFixed(2)+'%':'0.00%';
   const ps=v=>Math.round(v/SKU_TOT*100)+'% de SKUs';
   document.getElementById('k_pct_falt').textContent=pf(Math.abs(falt_final))+' del inv.';
