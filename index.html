@@ -279,8 +279,8 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
 <div class="kpi-bar">
  <div class="kpi" style="background:#EBF8FF;border-color:#63B3ED"><div class="val" style="font-size:14px;color:#2B6CB0">839</div><div class="lbl" style="color:#2B6CB0;font-weight:700">📦 SKUs con stock</div><div class="kpi-pct" style="color:#2B6CB0">universo del inventario</div></div>
  <div class="kpi navy"><div class="val">76</div><div class="lbl">Total casos</div><div class="kpi-pct" id="k_pct_casos">9.1% de SKUs</div></div>
- <div class="kpi red"><div class="val">30</div><div class="lbl">🔴 Faltantes</div><div class="kpi-pct">3.6% de SKUs</div></div>
- <div class="kpi blue"><div class="val">46</div><div class="lbl">🔵 Sobrantes</div><div class="kpi-pct">5.5% de SKUs</div></div>
+ <div class="kpi red"><div class="val" id="k_nfalt">30</div><div class="lbl">🔴 Faltantes</div><div class="kpi-pct" id="k_pct_nfalt">3.6% de SKUs</div></div>
+ <div class="kpi blue"><div class="val" id="k_nsobr">46</div><div class="lbl">🔵 Sobrantes</div><div class="kpi-pct" id="k_pct_nsobr">5.5% de SKUs</div></div>
  <div class="kpi yellow"><div class="val" id="k_pend">-</div><div class="lbl">⏳ Pendientes</div><div class="kpi-pct" id="k_pct_pend">—</div></div>
  <div class="kpi teal"><div class="val" id="k_conf">-</div><div class="lbl">🔄 Por confirmar</div><div class="kpi-pct" id="k_pct_conf">—</div></div>
  <div class="kpi green"><div class="val" id="k_res">-</div><div class="lbl">✅ Subsanados</div><div class="kpi-pct" id="k_pct_res">—</div></div>
@@ -1008,30 +1008,23 @@ const rowClsMap={
 };
 
 function rKPI(){
-  const isAjusteLocal=(cod)=>ST[cod]?.estado_con==='AJUSTE_CONFIRMADO';
-  const pend   = BASE.filter(c=>!isConfirmado(c.cod)&&!isPropuesto(c.cod)&&!isAjusteLocal(c.cod));
+  const isAjusteL=(cod)=>ST[cod]?.estado_con==='AJUSTE_CONFIRMADO';
+  const pend   = BASE.filter(c=>!isConfirmado(c.cod)&&!isPropuesto(c.cod)&&!isAjusteL(c.cod));
   const prop   = BASE.filter(c=>isPropuesto(c.cod));
   const conf   = BASE.filter(c=>isConfirmado(c.cod));
-  const aju    = BASE.filter(c=>isAjusteLocal(c.cod));
+  const aju    = BASE.filter(c=>isAjusteL(c.cod));
   const mAju   = aju.reduce((s,c)=>s+(parseFloat((ST[c.cod]||{}).monto_ajuste)||0),0);
-  // Faltantes/Sobrantes con diferencia aún pendiente (no cerrados)
-  const nFaltPend = BASE.filter(c=>c.tipo==='FALTANTE'&&!isConfirmado(c.cod)&&!isAjusteLocal(c.cod)).length;
-  const nSobrPend = BASE.filter(c=>c.tipo==='SOBRANTE'&&!isConfirmado(c.cod)&&!isAjusteLocal(c.cod)).length;
+  const nFaltPend = BASE.filter(c=>c.tipo==='FALTANTE'&&!isConfirmado(c.cod)&&!isAjusteL(c.cod)).length;
+  const nSobrPend = BASE.filter(c=>c.tipo==='SOBRANTE'&&!isConfirmado(c.cod)&&!isAjusteL(c.cod)).length;
   document.getElementById('k_pend').textContent=pend.length;
   document.getElementById('k_conf').textContent=prop.length;
   document.getElementById('k_res').textContent=conf.length;
   // Ajustes confirmados
-  const eKaju=document.getElementById('k_aju'); if(eKaju) eKaju.textContent=aju.length;
+  const eKaju=document.getElementById('k_aju');   if(eKaju)  eKaju.textContent=aju.length;
   const eKmaju=document.getElementById('k_maju'); if(eKmaju) eKmaju.textContent='S/'+mAju.toFixed(2);
-  // Faltantes/Sobrantes pendientes dinámicos
-  const eKnf=document.getElementById('k_nfalt');
-  if(eKnf){ eKnf.textContent=nFaltPend;
-    const ep=document.getElementById('k_pct_nfalt');
-    if(ep) ep.textContent=Math.round(nFaltPend/BASE.length*100*10)/10+'% de SKUs'; }
-  const eKns=document.getElementById('k_nsobr');
-  if(eKns){ eKns.textContent=nSobrPend;
-    const ep=document.getElementById('k_pct_nsobr');
-    if(ep) ep.textContent=Math.round(nSobrPend/BASE.length*100*10)/10+'% de SKUs'; }
+  // Faltantes / Sobrantes pendientes
+  const eNf=document.getElementById('k_nfalt');   if(eNf){ eNf.textContent=nFaltPend; const ep=document.getElementById('k_pct_nfalt'); if(ep) ep.textContent=Math.round(nFaltPend/BASE.length*100*10)/10+'% de SKUs'; }
+  const eNs=document.getElementById('k_nsobr');   if(eNs){ eNs.textContent=nSobrPend; const ep=document.getElementById('k_pct_nsobr'); if(ep) ep.textContent=Math.round(nSobrPend/BASE.length*100*10)/10+'% de SKUs'; }
   const pct=Math.round(conf.length/BASE.length*100);
   document.getElementById('prog_fill').style.width=pct+'%';
   document.getElementById('prog_txt').textContent=conf.length+' / '+BASE.length+' confirmados ('+pct+'%)';
@@ -1113,7 +1106,7 @@ function render(){
     const subsCls=estado_subs==='FULL'?'subs-full':estado_subs==='PARCIAL'?'subs-par':estado_subs==='PROPUESTO'?'mp':'subs-none';
     const subsLbl=estado_subs==='FULL'?'✅ 100%':estado_subs==='PARCIAL'?'📝 Parcial':estado_subs==='PROPUESTO'?'🔄 Prop.':'—';
     let estCell;
-    if(isAjuste(c.cod)) estCell='<span class="ebadge" style="background:#D69E2E;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">📋 AJUSTE</span>';
+    if(ST[c.cod]?.estado_con==='AJUSTE_CONFIRMADO') estCell='<span class="ebadge" style="background:#D69E2E;color:#fff;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">📋 AJUSTE</span>';
     else if(isCon) estCell='<span class="ebadge eCON">✅ CONFIRMADO</span>';
     else if(isProp) estCell='<span class="ebadge ePAR">🔄 PROPUESTO</span>';
     else estCell='<span class="ebadge '+(estClsMap[e]||'ePEN')+'">'+(estLblMap[e]||e)+'</span>';
@@ -1407,27 +1400,22 @@ async function confirmarAjuste(){
   const fapro=document.getElementById('m_fapro').value;
   if(!fapro){toast('⚠ Ingresa la fecha de confirmación');return;}
   const st_prev=ST[cod]||{};
-  // Saldo al ajuste = diferencia original - lo ya subsanado/confirmado
-  const dif_orig = Math.abs(parseFloat(c.dif)||0);
-  const cant_conf = parseFloat(st_prev.cant_conf)||0;
-  const saldo_ajuste = Math.max(0, dif_orig - cant_conf);
-  const cu = parseFloat(c.cu)||0;
-  const monto_ajuste = parseFloat((saldo_ajuste*cu).toFixed(2));
+  const dif_orig=Math.abs(parseFloat(c.dif)||0);
+  const cant_conf=parseFloat(st_prev.cant_conf)||0;
+  const saldo_ajuste=Math.max(0,dif_orig-cant_conf)||dif_orig;
+  const cu=parseFloat(c.cu)||0;
+  const monto_ajuste=parseFloat((saldo_ajuste*cu).toFixed(2));
   const data=Object.assign({},st_prev,{
-    estado_con:'AJUSTE_CONFIRMADO',
-    aprobado: aprobado,
-    fapro: fapro,
-    monto_ajuste: monto_ajuste,
-    saldo_ajuste: saldo_ajuste,
-    obs_con: document.getElementById('m_obs_con').value.trim(),
-    ts_con: new Date().toISOString()
+    estado_con:'AJUSTE_CONFIRMADO', aprobado:aprobado, fapro:fapro,
+    monto_ajuste:monto_ajuste, saldo_ajuste:saldo_ajuste,
+    obs_con:document.getElementById('m_obs_con').value.trim(),
+    ts_con:new Date().toISOString()
   });
   ST[cod]=data; guardarLocal();
   if(GS_URL) gsPost(cod,data);
   rKPI(); render(); cDD();
-  toast('📋 Ajuste confirmado — saldo '+saldo_ajuste+' ud · S/'+monto_ajuste.toFixed(2));
+  toast('📋 Ajuste: '+saldo_ajuste+' ud · S/'+monto_ajuste.toFixed(2)+' — aprobado por '+aprobado);
 }
-
 function rechazarSubs(){
   const cod=CUR; if(!cod) return;
   const aprobado=document.getElementById('m_aprobado').value.trim()||'Contabilidad';
