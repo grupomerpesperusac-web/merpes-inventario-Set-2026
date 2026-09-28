@@ -728,9 +728,11 @@ function iniciarApp(r){
   // Mostrar botón config solo para Logística
   const btnCfg=document.getElementById('btn_config');
   if(btnCfg) btnCfg.style.display=(r==='LOGISTICA')?'inline-block':'none';
-  // Sync inicial
+  // Sync inicial + preload Drive si es Logística
   if(GS_URL){ syncInicial(); }
   else { setSyncStatus('off','Sin sincronización configurada'); }
+  // Precargar matches de Drive solo para Logística
+  if(r==='LOGISTICA') setTimeout(preloadDriveMatches, 1500);
 }
 function cerrarSesion(){
   ROL=null; rolSel=null;
@@ -843,6 +845,24 @@ async function syncInicial(){
 }
 
 setInterval(syncNow, 30000);
+
+// === PRELOAD DESDE GOOGLE DRIVE (auto-generado) ===
+function preloadDriveMatches(){
+  const pl={"CASO19": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 1, "tsust": "GUIA_REMISION", "ndoc": "T011-00019506", "link_drive": "https://drive.google.com/file/d/1KAJ0fp_3KThfUWyiWkBRJUCQy88ipeJW/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1KAJ0fp_3KThfUWyiWkBRJUCQy88ipeJW/view?usp=drivesdk", "https://drive.google.com/file/d/1TooESLr3g8ItLynXW11P54V7UUt5eiJP/view?usp=drivesdk"], "links_titles": ["SKU 10000290 T011-19506.pdf", "09487462-T011-00019506.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO23": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 2, "tsust": "GUIA_REMISION", "ndoc": "T011-00019742 / T011-00019748", "link_drive": "https://drive.google.com/file/d/1zLMIYEjCE_e8Hnmj0ljG03jcLFyRNUMW/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1zLMIYEjCE_e8Hnmj0ljG03jcLFyRNUMW/view?usp=drivesdk", "https://drive.google.com/file/d/10PhEvdyTsBt5L6iXStAC2WIlQHPJCatC/view?usp=drivesdk"], "links_titles": ["40734688-T011-00019742.PDF", "17619320-T011-00019748.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO28": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 1, "tsust": "GUIA_REMISION", "ndoc": "T002-00109279", "link_drive": "https://drive.google.com/file/d/1IyXeJ4pe9O7sA0WUQcTStEdG6GcJr7RU/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1IyXeJ4pe9O7sA0WUQcTStEdG6GcJr7RU/view?usp=drivesdk"], "links_titles": ["45923426-T002-00109279.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO31": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 2, "tsust": "GUIA_REMISION", "ndoc": "T011-00019652 / T011-00019650", "link_drive": "https://drive.google.com/file/d/194rdgZOZIpLaUkQdIG5zWVyGjizp7qyl/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/194rdgZOZIpLaUkQdIG5zWVyGjizp7qyl/view?usp=drivesdk", "https://drive.google.com/file/d/1fBpcxT59oc_lv7Djk5kTMUzz-ByIaDrz/view?usp=drivesdk"], "links_titles": ["20516587874-T011-00019652.PDF", "33573742-T011-00019650.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO32": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 27, "tsust": "GUIA_REMISION", "ndoc": "T006-00001145", "link_drive": "https://drive.google.com/file/d/17YM1QTNqZ-XZgXFhNffY5f3SJtu8QUUd/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/17YM1QTNqZ-XZgXFhNffY5f3SJtu8QUUd/view?usp=drivesdk"], "links_titles": ["20610033033-T006-00001145.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO35": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 1, "tsust": "GUIA_REMISION", "ndoc": "T015-00000377 / B002-00014828", "link_drive": "https://drive.google.com/file/d/1jNyVT6JLhBPh7Oh3uz4KrGh2Nh7g5Ddn/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1jNyVT6JLhBPh7Oh3uz4KrGh2Nh7g5Ddn/view?usp=drivesdk", "https://drive.google.com/file/d/1Aw0DgVQDgeYyCTquWioXi3Z3tOTxwlV7/view?usp=drivesdk"], "links_titles": ["44971272-T015-00000377.PDF", "SKU11000563-B002-00014828.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO40": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 1, "tsust": "GUIA_REMISION", "ndoc": "T002-00109272", "link_drive": "https://drive.google.com/file/d/1li1tjJr_AGU3dFDcx9bkkJ2kLkrpQk9J/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1li1tjJr_AGU3dFDcx9bkkJ2kLkrpQk9J/view?usp=drivesdk"], "links_titles": ["T002-00109272.pdf"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO74": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 3, "tsust": "GUIA_REMISION", "ndoc": "T011-00018868 / T011-00019624 / T011-00019583", "link_drive": "https://drive.google.com/file/d/1SUc-bRLV6J65q4TtpGs4RfQlhjY_giZx/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1SUc-bRLV6J65q4TtpGs4RfQlhjY_giZx/view?usp=drivesdk", "https://drive.google.com/file/d/1T35jiQat9P_QsBT-wbXhdZs8tE7VtZCD/view?usp=drivesdk", "https://drive.google.com/file/d/1YybpcC0UyDE3uDA5iK6G109gHWoYqNbd/view?usp=drivesdk", "https://drive.google.com/file/d/1Eoa0Gu4jZ4nYlRfDoAssTXyiF4mQpw__/view?usp=drivesdk", "https://drive.google.com/file/d/1T9VHNzZmJlWS2Mj4yG7BqCpewpxbe4hA/view?usp=drivesdk"], "links_titles": ["T011-00018868 (1).PDF", "T011-00018868 (BALANZA).PDF", "T011-00018868 (BALANZA COMERCIAL).PDF", "10463993667-T011-00019624.PDF", "10077516684-T011-00019583.PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}, "CASO70": {"est": "PENDIENTE", "resp": "", "obs": "", "cant_subs": 3, "tsust": "GUIA_REMISION", "ndoc": "T011-00019620 / T011-00019604 / T011-00019639", "link_drive": "https://drive.google.com/file/d/1vomCmbbcmL3vb27jpsZDeZx681hAEea1/view?usp=drivesdk", "links_all": ["https://drive.google.com/file/d/1vomCmbbcmL3vb27jpsZDeZx681hAEea1/view?usp=drivesdk"], "links_titles": ["20607843776-T011-00019620 (SET FACUSA).PDF"], "ts": "2026-09-28T14:30:00.000Z", "rol_modifico": "AUTO_DRIVE"}};
+  Object.entries(pl).forEach(([caso,data])=>{
+    // Solo precargar si el caso no tiene datos previos o si cant_subs no está definido
+    const existing = ST[caso] || {};
+    if(existing.cant_subs===undefined || existing.cant_subs===null || existing.cant_subs===''){
+      ST[caso] = {...existing, ...data};
+    }
+  });
+  guardarLocal();
+  if(GS_URL){
+    Object.entries(pl).forEach(([caso,data])=>{ gsPost(caso, ST[caso]); });
+  }
+  rKPI(); render();
+  toast('✅ '+Object.keys(pl).length+' casos pre-cargados desde Google Drive');
+}
 
 // ── FUNCIONES MODAL CONFIG ──
 function abrirConfig(){
