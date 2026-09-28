@@ -265,6 +265,7 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
    <div class="user-chip uc-LOG" id="user_chip" onclick="cerrarSesion()" title="Clic para cerrar sesión">
     <span id="user_ico">📦</span><span id="user_name">Logística</span><span style="opacity:.6;font-size:10px"> · Salir</span>
    </div>
+   <button id="btn_preload" onclick="preloadDriveMatches()" title="Cargar sustentos desde Google Drive" style="display:none;background:#276749;border:1px solid #9AE6B4;color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-left:4px">📂 Drive</button>
    <button id="btn_config" onclick="abrirConfig()" title="Configurar sincronización" style="display:none;background:#1a3a5c;border:1px solid #2d6a9f;color:#fff;border-radius:6px;padding:4px 9px;font-size:11px;cursor:pointer;margin-left:6px">⚙ Sync</button>
    <span id="sync_indicator" title="Sin sincronización configurada" style="margin-left:6px;font-size:16px;cursor:pointer" onclick="abrirConfig()">⚫</span>
    <span class="hbadge" id="reloj">--:--</span>
@@ -728,6 +729,8 @@ function iniciarApp(r){
   // Mostrar botón config solo para Logística
   const btnCfg=document.getElementById('btn_config');
   if(btnCfg) btnCfg.style.display=(r==='LOGISTICA')?'inline-block':'none';
+  const btnPre=document.getElementById('btn_preload');
+  if(btnPre) btnPre.style.display=(r==='LOGISTICA')?'inline-block':'none';
   // Sync inicial + preload Drive si es Logística
   if(GS_URL){ syncInicial(); }
   else { setSyncStatus('off','Sin sincronización configurada'); }
@@ -852,8 +855,18 @@ function preloadDriveMatches(){
   Object.entries(pl).forEach(([caso,data])=>{
     // Solo precargar si el caso no tiene datos previos o si cant_subs no está definido
     const existing = ST[caso] || {};
-    if(existing.cant_subs===undefined || existing.cant_subs===null || existing.cant_subs===''){
-      ST[caso] = {...existing, ...data};
+    // Precargar si: no tiene cant_subs, o cant_subs está vacío, o no tiene link_drive
+    const sinSustento = (existing.cant_subs===undefined || existing.cant_subs===null || existing.cant_subs==='');
+    const sinLink = (!existing.link_drive || existing.link_drive==='');
+    if(sinSustento || sinLink){
+      // Preservar obs y resp originales si ya existen
+      ST[caso] = {
+        ...existing,
+        ...data,
+        obs: existing.obs || data.obs,
+        resp: existing.resp || data.resp,
+        est: existing.est || data.est
+      };
     }
   });
   guardarLocal();
