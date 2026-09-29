@@ -233,18 +233,18 @@ tr:hover td{filter:brightness(.96);cursor:pointer}
 .kpi-panel{position:sticky;top:0;z-index:100;background:#fff;border-bottom:2px solid var(--borde);box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .kpi-row{display:flex;flex-wrap:nowrap;gap:0;padding:6px 10px;width:100%;box-sizing:border-box}
 .kpi-row:first-child{border-bottom:1px solid #e2e8f0}
-/* Tarjeta base — flex:1 para distribuir equitativamente */
 .kpi{flex:1;text-align:center;padding:6px 4px;border-radius:7px;border:1px solid var(--borde);margin:0 2px}
 .kpi .val{font-size:15px;font-weight:700;line-height:1.1}
 .kpi .lbl{font-size:10px;font-weight:600;color:#4A5568;margin-top:1px}
 .kpi .kpi-pct{font-size:9px;color:#718096;margin-top:1px}
-/* Separador visual entre grupos */
 .kpi-sep{width:2px;background:#CBD5E0;margin:4px 6px;flex-shrink:0;border-radius:2px}
-/* Sticky tabla */
 .prog-wrap{position:sticky;top:76px;z-index:99;background:#fff}
 .filtros{position:sticky;top:115px;z-index:98;background:#FAFAFA;border-bottom:1px solid #e2e8f0}
 .tbl-wrap{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 190px)}
 thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
+/* Botón ajuste en filtros */
+.fb.aju{background:#D69E2E;color:#fff;border-color:#D69E2E}
+.fb.aju.act{background:#92400E;border-color:#92400E}
 </style>
 </head>
 <body>
@@ -294,11 +294,7 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
 </header>
 
 <div class="kpi-panel" id="kpi_panel">
-
- <!-- FILA 1: CANTIDADES DE CASOS -->
  <div class="kpi-row">
-
-  <!-- GRUPO: TOTALES -->
   <div class="kpi" style="background:#EBF8FF;border-color:#63B3ED">
    <div class="val" style="color:#2B6CB0">839</div>
    <div class="lbl" style="color:#2B6CB0">📦 Universo inv.</div>
@@ -309,24 +305,18 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
    <div class="lbl">📋 Total casos</div>
    <div class="kpi-pct" id="k_pct_casos">9.1% de SKUs</div>
   </div>
-
-  <div class="kpi-sep" title="DIFERENCIAS POR TIPO"></div>
-
-  <!-- GRUPO: TIPO DE DIFERENCIA -->
+  <div class="kpi-sep"></div>
   <div class="kpi red">
    <div class="val" style="font-size:13px"><span id="k_nfalt_orig">30</span> → <span id="k_nfalt">30</span></div>
    <div class="lbl">🔴 Faltantes</div>
-   <div class="kpi-pct" id="k_pct_nfalt">inicio → aún pendientes</div>
+   <div class="kpi-pct" id="k_pct_nfalt">inicio → pendientes</div>
   </div>
   <div class="kpi blue">
    <div class="val" style="font-size:13px"><span id="k_nsobr_orig">46</span> → <span id="k_nsobr">46</span></div>
    <div class="lbl">🔵 Sobrantes</div>
-   <div class="kpi-pct" id="k_pct_nsobr">inicio → aún pendientes</div>
+   <div class="kpi-pct" id="k_pct_nsobr">inicio → pendientes</div>
   </div>
-
-  <div class="kpi-sep" title="ESTATUS DE GESTIÓN"></div>
-
-  <!-- GRUPO: ESTATUS DE GESTIÓN -->
+  <div class="kpi-sep"></div>
   <div class="kpi yellow">
    <div class="val" id="k_pend">-</div>
    <div class="lbl">⏳ Pendientes</div>
@@ -345,15 +335,10 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
   <div class="kpi" style="background:#FEFCBF;border:2px solid #D69E2E">
    <div class="val" id="k_aju" style="color:#744210">0</div>
    <div class="lbl" style="color:#744210;font-weight:700">📋 Ajuste en SIG</div>
-   <div class="kpi-pct" id="k_pct_aju" style="color:#744210">registrar en sistema</div>
+   <div class="kpi-pct" id="k_pct_aju" style="color:#744210">regularizar sistema</div>
   </div>
-
  </div>
-
- <!-- FILA 2: MONTOS EN SOLES -->
  <div class="kpi-row">
-
-  <!-- GRUPO: TOTALES S/ -->
   <div class="kpi gray">
    <div class="val" style="font-size:11px">S/2,316,108</div>
    <div class="lbl">💰 Inventario total</div>
@@ -362,12 +347,9 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
   <div class="kpi" style="background:#F7FAFC;border-color:#A0AEC0">
    <div class="val" style="font-size:11px" id="k_dif_neta">—</div>
    <div class="lbl">⚖ Dif. neta total</div>
-   <div class="kpi-pct" id="k_pct_dif_neta">sobr. - falt.</div>
+   <div class="kpi-pct" id="k_pct_dif_neta">sobr. − falt.</div>
   </div>
-
   <div class="kpi-sep"></div>
-
-  <!-- GRUPO: DIFERENCIAS POR TIPO S/ (% sobre inventario total) -->
   <div class="kpi red">
    <div class="val" style="font-size:11px" id="k_an_falt">S/8,291</div>
    <div class="lbl">🔴 Total Faltantes</div>
@@ -378,10 +360,7 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
    <div class="lbl">🔵 Total Sobrantes</div>
    <div class="kpi-pct" id="k_pct_sobr">% del inv. total</div>
   </div>
-
   <div class="kpi-sep"></div>
-
-  <!-- GRUPO: ESTATUS S/ -->
   <div class="kpi yellow">
    <div class="val" style="font-size:11px" id="k_s_pend">—</div>
    <div class="lbl">⏳ Pendiente S/</div>
@@ -402,9 +381,7 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
    <div class="lbl" style="color:#744210;font-weight:700">📋 Ajuste SIG S/</div>
    <div class="kpi-pct" id="k_pct_maju" style="color:#744210">a regularizar</div>
   </div>
-
  </div>
-
 </div>
 <div class="prog-wrap">
  <div class="prog-lbl"><span>Subsanación confirmada por Contabilidad</span><span id="prog_txt">0 / 76 (0%)</span></div>
@@ -417,7 +394,8 @@ thead th{position:sticky;top:0;z-index:10;background:var(--azul)}
  <button class="fb b"   id="fb_s" onclick="setF('SOBRANTE')">🔵 Sobrantes</button>
  <button class="fb y"   id="fb_p" onclick="setF('PENDIENTE')">⏳ Pendientes</button>
  <button class="fb"     id="fb_c" onclick="setF('CONFIRMAR')">🔄 Por confirmar</button>
- <button class="fb g"   id="fb_r" onclick="setF('RESUELTO')">✅ Subsanados</button>
+ <button class="fb g"   id="fb_r" onclick="setF('RESUELTO')">✅ Confirmados</button>
+ <button class="fb aju" id="fb_a" onclick="setF('AJUSTE')">📋 Ajuste SIG</button>
  <button class="bx bx-csv"  onclick="exportCSV()">⬇ CSV</button>
  <button class="bx bx-rpt"  onclick="abrirInforme()">📄 Informe</button>
 </div>
@@ -1125,43 +1103,34 @@ const rowClsMap={
 function rKPI(){
   const INV_TOT=2316108.21;
   const isAjusteL=(cod)=>ST[cod]?.estado_con==='AJUSTE_CONFIRMADO';
-  // Grupos estatus
   const pend=BASE.filter(c=>!isConfirmado(c.cod)&&!isPropuesto(c.cod)&&!isAjusteL(c.cod));
   const prop=BASE.filter(c=>isPropuesto(c.cod)&&!isAjusteL(c.cod));
   const conf=BASE.filter(c=>isConfirmado(c.cod));
   const aju =BASE.filter(c=>isAjusteL(c.cod));
-  // Grupos tipo — pendientes aún (no cerrados)
   const nFaltOrig=BASE.filter(c=>c.tipo==='FALTANTE').length;
   const nSobrOrig=BASE.filter(c=>c.tipo==='SOBRANTE').length;
   const nFaltPend=BASE.filter(c=>c.tipo==='FALTANTE'&&!isConfirmado(c.cod)&&!isAjusteL(c.cod)).length;
   const nSobrPend=BASE.filter(c=>c.tipo==='SOBRANTE'&&!isConfirmado(c.cod)&&!isAjusteL(c.cod)).length;
-  // Montos
-  const cu =(c)=>parseFloat(c.cu)||0;
+  const cu=(c)=>parseFloat(c.cu)||0;
   const dif=(c)=>Math.abs(parseFloat(c.dif)||0);
-  // Diferencias originales totales (sobre inventario)
   const mFaltOrig=BASE.filter(c=>c.tipo==='FALTANTE').reduce((s,c)=>s+dif(c)*cu(c),0);
   const mSobrOrig=BASE.filter(c=>c.tipo==='SOBRANTE').reduce((s,c)=>s+dif(c)*cu(c),0);
-  const mDifNeta =mSobrOrig-mFaltOrig;
-  // Montos por estatus
+  const mDifNeta=mSobrOrig-mFaltOrig;
   const mPend=pend.reduce((s,c)=>s+dif(c)*cu(c),0);
   const mProp=prop.reduce((s,c)=>s+dif(c)*cu(c),0);
   const mConf=conf.reduce((s,c)=>s+(parseFloat((ST[c.cod]||{}).cant_conf)||dif(c))*cu(c),0);
   const mAju =aju.reduce((s,c)=>s+(parseFloat((ST[c.cod]||{}).monto_ajuste)||0),0);
-  // Totales
   const totalCerrados=conf.length+aju.length;
   const pct=Math.round(totalCerrados/BASE.length*100);
-  // Formateo
   const fmt=(v)=>'S/'+Math.abs(Math.round(v)).toLocaleString('es-PE');
   const pI=(v)=>(Math.abs(v)/INV_TOT*100).toFixed(2)+'% inv.';
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  // Fila 1 — cantidades
   set('k_pend',pend.length); set('k_pct_pend',Math.round(pend.length/BASE.length*100)+'% casos');
   set('k_conf',prop.length); set('k_pct_conf',Math.round(prop.length/BASE.length*100)+'% casos');
   set('k_res', conf.length); set('k_pct_res', Math.round(conf.length/BASE.length*100)+'% casos');
   set('k_aju', aju.length);  set('k_pct_aju', Math.round(aju.length/BASE.length*100)+'% casos');
   set('k_nfalt',nFaltPend);  set('k_pct_nfalt',nFaltOrig+'→'+nFaltPend+' pendientes');
   set('k_nsobr',nSobrPend);  set('k_pct_nsobr',nSobrOrig+'→'+nSobrPend+' pendientes');
-  // Fila 2 — montos S/ (falt/sobr como % del inventario total)
   set('k_an_falt','-'+fmt(mFaltOrig)); set('k_pct_falt','-'+pI(mFaltOrig));
   set('k_an_sobr','+'+fmt(mSobrOrig)); set('k_pct_sobr','+'+pI(mSobrOrig));
   set('k_dif_neta',(mDifNeta>=0?'+':'')+fmt(mDifNeta)); set('k_pct_dif_neta',pI(mDifNeta)+' inv.');
@@ -1169,18 +1138,18 @@ function rKPI(){
   set('k_s_conf',fmt(mProp));   set('k_pct_s_conf',pI(mProp));
   set('k_subsanado',fmt(mConf));set('k_pct_sub',pI(mConf));
   set('k_maju',fmt(mAju));      set('k_pct_maju',pI(mAju));
-  // Progreso
   document.getElementById('prog_fill').style.width=pct+'%';
   document.getElementById('prog_txt').textContent=totalCerrados+' / '+BASE.length+' confirmados ('+pct+'%)';
   document.getElementById('fb_p').textContent='⏳ Pendientes ('+pend.length+')';
   document.getElementById('fb_c').textContent='🔄 Por confirmar ('+prop.length+')';
   document.getElementById('fb_r').textContent='✅ Confirmados ('+conf.length+')';
+  const fbA=document.getElementById('fb_a'); if(fbA) fbA.textContent='📋 Ajuste SIG ('+aju.length+')';
 }
 
 function setF(f){
   FILT=f;
   document.querySelectorAll('.fb').forEach(b=>b.classList.remove('act'));
-  const m={TODOS:'fb_t',FALTANTE:'fb_f',SOBRANTE:'fb_s',PENDIENTE:'fb_p',CONFIRMAR:'fb_c',RESUELTO:'fb_r'};
+  const m={TODOS:'fb_t',FALTANTE:'fb_f',SOBRANTE:'fb_s',PENDIENTE:'fb_p',CONFIRMAR:'fb_c',RESUELTO:'fb_r',AJUSTE:'fb_a'};
   document.getElementById(m[f])?.classList.add('act');
   render();
 }
@@ -1193,9 +1162,10 @@ function render(){
     const isCon=isConfirmado(c.cod), isProp=isPropuesto(c.cod);
     const mf=FILT==='TODOS'
       ||(FILT==='FALTANTE'&&c.dif<0)||(FILT==='SOBRANTE'&&c.dif>0)
-      ||(FILT==='PENDIENTE'&&!isCon&&!isProp)
-      ||(FILT==='CONFIRMAR'&&isProp)
-      ||(FILT==='RESUELTO'&&isCon);
+      ||(FILT==='PENDIENTE'&&!isCon&&!isProp&&ST[c.cod]?.estado_con!=='AJUSTE_CONFIRMADO')
+      ||(FILT==='CONFIRMAR'&&isProp&&ST[c.cod]?.estado_con!=='AJUSTE_CONFIRMADO')
+      ||(FILT==='RESUELTO'&&isCon)
+      ||(FILT==='AJUSTE'&&ST[c.cod]?.estado_con==='AJUSTE_CONFIRMADO');
     const ms=!q||c.cod.includes(q)||c.desc.toLowerCase().includes(q)||c.grp.toLowerCase().includes(q)||gR(c).toLowerCase().includes(q)||c.caso.toLowerCase().includes(q);
     return mf&&ms;
   });
